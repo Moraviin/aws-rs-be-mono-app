@@ -1,0 +1,66 @@
+swagger: "2.0"
+info:
+  description: "This is my documentation about product service endpoints for swagger"
+  version: "1.0.0"
+  title: "RS APP TASK 3"
+tags:
+- name: "product-service"
+
+schemes:
+- "https"
+paths:
+  /products:
+    get:
+      tags:
+      - "product-service"
+      description: "Return all products"
+      produces: 
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+  /products/{productId}:
+    get:
+      tags:
+      - "product-service"
+      summary: "Find product by ID"
+      description: "Returns a single product"
+      operationId: "getPetById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "ID of product to return"
+        required: true
+        type: "integer"
+        format: "uuid"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Product"
+        "404":
+          description: "Product not found!"
+definitions:
+  Product:
+    type: "object"
+    required:
+    - "name"
+    - "photoUrls"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      count:
+        type: "integer"
+      description:
+        type: "string"
+      price:
+        type: "integer"
+      title:
+        type: "string"
