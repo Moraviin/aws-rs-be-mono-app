@@ -1,9 +1,14 @@
-import {db} from './super-puper-db';
+import { connectLambda } from "./utils/connectLambda";
 
-export const getAll = async () => {
-  const products = await Promise.resolve(db);
-   return {
+const lambdaGetAll = async ({ dbClient }) => {
+  const products = await dbClient.query(
+    "select * from items inner join stock on items.id = stock.item_id;"
+  );
+
+  return {
     statusCode: 200,
-    body: JSON.stringify(products)
+    body: JSON.stringify(products.rows),
   };
 };
+
+export const getAll = connectLambda(lambdaGetAll);
