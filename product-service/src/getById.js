@@ -1,12 +1,15 @@
-import { db } from "./super-puper-db";
+import { connectLambda } from "./utils/connectLambda";
 
-export const getById = async (event) => {
-  const { productId } = event.pathParameters;
-  const product = await Promise.resolve(db.find((item) => item.id === productId));
+const lambdaGetByID = async ({lambdasArgs, dbClient }) => {
+  const { productId } = lambdasArgs[0].pathParameters;
+  const product = await dbClient.query(
+    `select * from items inner join stock on items.id = stock.item_id where id = '${productId}';`,
+  );
+
   if (product) {
     return {
       statusCode: 200,
-      body: JSON.stringify(product),
+      body: JSON.stringify(product.rows[0]),
     };
   }
   return {
@@ -14,3 +17,5 @@ export const getById = async (event) => {
     error: "Product not found!",
   };
 };
+
+export const getById = connectLambda(lambdaGetByID);
