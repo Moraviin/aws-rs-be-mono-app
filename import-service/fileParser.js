@@ -13,6 +13,15 @@ export const fileParser = async (event) => {
     s3.getObject(params)
       .createReadStream()
       .pipe(csv())
-      .on("data", (data) => console.log(data));
+      .on("data", (data) => console.log(data))
+      .on("end", async () => {
+        await s3.copyObject({
+          Bucket: "import-service-uz-task5",
+          CopySource: "import-service-uz-task5" + '/' + record.s3.object.key,
+          Key: record.s3.object.key.replace('uploaded', 'parsed'),
+        });
+
+        await s3.deleteObject(params);
+      });
   }
 };
