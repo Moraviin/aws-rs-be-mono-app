@@ -1,17 +1,18 @@
-export const hello = (event, context, cb) => {
-  const p = new Promise((resolve) => {
-    resolve('success');
-  });
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: 'Go Serverless Webpack (Ecma Script) v1.0! Second module!',
-        input: event,
-      },
-      null,
-      2
-    ),
-  };
-  p.then(() => cb(null, response)).catch((e) => cb(e));
+import AWS from "aws-sdk";
+import csv from "csv-parser";
+
+export const fileParser = async (event) => {
+  const s3 = new AWS.S3({ region: "eu-central-1" });
+
+  for (const record of event.Records) {
+    const params = {
+      Bucket: "import-service-uz-task5",
+      Key: record.s3.object.key,
+    };
+
+    s3.getObject(params)
+      .createReadStream()
+      .pipe(csv())
+      .on("data", (data) => console.log(data));
+  }
 };

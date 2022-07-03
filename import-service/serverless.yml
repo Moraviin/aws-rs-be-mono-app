@@ -38,4 +38,12 @@ functions:
             parameters:
               querystrings:
                 name: true
-
+  importFileParser:
+    handler: fileParser.fileParser
+    events:
+      - s3:
+          bucket: "import-service-uz-task5"
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+          existing: true
