@@ -4,11 +4,11 @@ import AWS from 'aws-sdk';
 export const importFile = async (event) => {
   const name = event.queryStringParameters.name;
 
-  const s3 = new AWS.S3({ region: 'eu-central-1' });
+  const s3 = new AWS.S3({ region: 'eu-central-1', signatureVersion: 'v4' });
 
   const params = {
     Bucket: 'import-service-uz-task5',
-    Key: `uploaded/${name}.csv`,
+    Key: `uploaded/${name}`,
     Expires: 60,
     ContentType: 'text/csv'
   };
@@ -18,6 +18,28 @@ export const importFile = async (event) => {
 
   return {
     statusCode: 200,
+    headers : {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true
+    },
     body: JSON.stringify(signedURL)
   }
 };
+
+
+export const readFiles = async (event) => {
+  const s3 = new AWS.S3({ region: 'eu-central-1', signatureVersion: 'v4' });
+
+  const params = {
+    Bucket: 'import-service-uz-task5',
+    Prefix: `uploaded/`,
+    Delimiter: '/'
+  };
+
+  const files = await s3.listObjectsV2(params).promise();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(files)
+  }
+}
