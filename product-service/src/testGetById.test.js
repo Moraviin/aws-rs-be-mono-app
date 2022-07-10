@@ -12,11 +12,9 @@ test("test getAll", async () => {
 });
 
 test("test getAll fail", async () => {
-    const testId = "7567ec4b-b10c-48c5-9345-fc73c48a80ab";
-    const result = await getById({ pathParameters: { productId: testId } });
-  
-    expect(result.statusCode).toBe(404);
-    expect(result.error).toBe(
-        'Product not found!'
-    );
-  });
+  const testId = "7567ec4b-b10c-48c5-9345-fc73c48a80ab";
+  const result = await getById({ pathParameters: { productId: testId } });
+
+  expect(result.statusCode).toBe(404);
+  expect(result.error).toBe("Product not found!");
+});

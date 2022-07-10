@@ -13,9 +13,22 @@ provider:
   runtime: nodejs14.x
   stage: dev
   region: eu-central-1
+  environment:
+    SQS_URL:
+      Ref: catalogItemsQueue
   iam:
     role:
       statements:
+        - Effect: Allow
+          Action: sqs:*
+          Resource:
+            - Fn::GetAtt:
+                - catalogItemsQueue
+                - Arn
+        - Effect: Allow
+          Action: sns:*
+          Resource:
+            Ref: createProductTopic
         - Effect: Allow
           Action: "s3:ListBucket"
           Resource:
@@ -25,6 +38,26 @@ provider:
             - "s3:*"
           Resource:
           - 'arn:aws:s3:::import-service-uz-task5/*'
+
+resources:
+  Resources:
+    catalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalogItemsQueue
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: rss-aws-sns-topic
+    SNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: test@gmail.com
+        TopicArn:
+          Ref: createProductTopic
+
+    
 
 functions:
   importProductsFile:
@@ -38,6 +71,13 @@ functions:
             parameters:
               querystrings:
                 name: true
+  getFiles:
+    handler: importFile.readFiles
+    events:
+      - http:
+          method: get
+          path: /products
+          cors: true
   importFileParser:
     handler: fileParser.fileParser
     events:
@@ -47,3 +87,12 @@ functions:
           rules:
             - prefix: uploaded/
           existing: true
+  catalogBatchProcess:
+    handler: catalogBatchProcess.batch
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - catalogItemsQueue
+              - Arn
+          batchSize: 10
